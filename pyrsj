@@ -1,0 +1,30 @@
+#!/usr/bin/env python3
+# encoding=UTF-8
+
+# Copyright © 2022 Jakub Wilk <jwilk@jwilk.net>
+# SPDX-License-Identifier: MIT
+
+import argparse
+
+import rope.base.project
+import rope.refactor.restructure
+
+def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument('path', metavar='PATH')
+    opts = ap.parse_args()
+    project = rope.base.project.Project(opts.path, ropefolder=None)
+    for tp in 'str', 'bytes':
+        restructuring = rope.refactor.restructure.Restructure(
+            project,
+            '${str}.join(${arg})',
+            tp + '.join(${str}, ${arg})',
+            dict(str='type=__builtin__.' + tp),
+        )
+        project.do(restructuring.get_changes())
+    project.do(restructuring.get_changes())
+
+if __name__ == '__main__':
+    main()
+
+# vim:ts=4 sts=4 sw=4 et
